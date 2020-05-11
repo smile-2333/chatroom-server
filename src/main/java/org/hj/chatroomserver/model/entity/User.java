@@ -2,6 +2,11 @@ package org.hj.chatroomserver.model.entity;
 
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hj.chatroomserver.model.enums.Role;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,7 +14,9 @@ import java.util.Date;
 @DynamicInsert
 @Entity
 @Data
-public class User implements TimeSetting{
+@DynamicUpdate
+@EntityListeners(AuditingEntityListener.class)
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
@@ -22,8 +29,9 @@ public class User implements TimeSetting{
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
     private String city;
 
@@ -35,8 +43,17 @@ public class User implements TimeSetting{
     @Column(unique = true,nullable = false)
     private String email;
 
+    @CreatedDate
     private Date createTime;
 
+    @LastModifiedDate
     private Date updateTime;
+
+
+    @Column(columnDefinition = "tinyint default 0")
+    private Boolean isDelete;
+
+    @Column(columnDefinition = "tinyint default 0")
+    private Boolean isActive;
 
 }

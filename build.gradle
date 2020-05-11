@@ -19,6 +19,7 @@ configurations {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -44,6 +45,12 @@ dependencies {
 
 // https://mvnrepository.com/artifact/com.google.guava/guava
     compile group: 'com.google.guava', name: 'guava', version: '29.0-jre'
+
+    implementation(group: 'org.csource', name: 'fastdfs-client-java', version: '1.29-SNAPSHOT'){
+        exclude module: 'slf4j-log4j12'
+    }
+    compile group: 'org.ehcache', name: 'ehcache', version: '3.6.3'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.10'
 }
 
 test {

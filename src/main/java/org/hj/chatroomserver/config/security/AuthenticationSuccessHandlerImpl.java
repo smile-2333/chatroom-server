@@ -2,9 +2,9 @@ package org.hj.chatroomserver.config.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.hj.chatroomserver.model.result.CommonCode;
-import org.hj.chatroomserver.model.result.ResponseResult;
+import org.hj.chatroomserver.model.dto.UserDto;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -25,10 +25,17 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        final ResponseResult responseResult = new ResponseResult(CommonCode.SUCCESS);
-        String result = objectMapper.writeValueAsString(responseResult);
-        response.setContentType("text/json;charset=utf-8");
-        response.getWriter().write(result);
+        Object userInfo = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (userInfo != null) {
+            if (userInfo instanceof UserDto){
+
+                String result = objectMapper.writeValueAsString(userInfo);
+                response.setContentType("text/json;charset=utf-8");
+                response.getWriter().write(result);
+            }
+        }
+
         log.debug("login success");
     }
 }

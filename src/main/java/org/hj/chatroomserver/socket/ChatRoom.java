@@ -26,7 +26,6 @@ public class ChatRoom extends TextWebSocketHandler {
 
 		Message newMessage = new Message();
 		newMessage.setContent(message.getPayload());
-		newMessage.setAllWithCurrentTime();
 		newMessage.setOwnerId(1);
 		newMessage.setContextType(ContextType.TEXT);
 		final MessageVo messageVo = messageService.saveMessage(newMessage);

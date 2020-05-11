@@ -5,43 +5,58 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 
+/**
+ * @see org.hj.chatroomserver.model.entity.User
+ */
 @Data
 public class UserDto implements UserDetails {
 
+    private Integer userId;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
-    }
+    private String username;
 
-    @Override
-    public String getPassword() {
-        return null;
-    }
+    private String password;
 
-    @Override
-    public String getUsername() {
-        return null;
-    }
+    private String description;
+
+    private String city;
+
+    private String phone;
+
+    private String avatar;
+
+    private String email;
+
+    private Date createTime;
+
+    private Date updateTime;
+
+    private Boolean isDelete;
+
+    private Boolean isActive;
+
+
+    private Collection<? extends GrantedAuthority>authorities;
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 }
