@@ -12,6 +12,7 @@ public enum CommonCode implements ResultCode{
     UPLOAD_IMAGE_FAIL(false,100008,"上传图片失败"),
     USERNAME_BEEN_USED(false,100010,"用户名已被占用"),
     EMAIL_BEEN_USED(false,100011,"邮箱已被占用"),
+    MESSAGE_SENT_ERROR(false,100012,"消息发送失败"),
     ;
 
     boolean success;

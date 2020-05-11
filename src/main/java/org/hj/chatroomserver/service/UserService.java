@@ -140,7 +140,7 @@ public class UserService {
 
         if (!StringUtils.equals(user.getEmail(), userDto.getEmail())) {
             userRepository.findByEmail(userDto.getEmail()).ifPresent(existUser -> {
-                throw new CustomException(CommonCode.USERNAME_BEEN_USED);
+                throw new CustomException(CommonCode.EMAIL_BEEN_USED);
             });
             user.setEmail(userDto.getEmail());
         }
