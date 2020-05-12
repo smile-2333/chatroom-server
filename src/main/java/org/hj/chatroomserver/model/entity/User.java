@@ -1,5 +1,6 @@
 package org.hj.chatroomserver.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -16,6 +17,7 @@ import java.util.Date;
 @Data
 @DynamicUpdate
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,5 +57,9 @@ public class User {
 
     @Column(columnDefinition = "tinyint default 0")
     private Boolean isActive;
+
+    private Date lastLoginTime;
+
+    private Date lastLogoutTime;
 
 }

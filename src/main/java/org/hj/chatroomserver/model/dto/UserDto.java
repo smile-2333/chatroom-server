@@ -37,6 +37,9 @@ public class UserDto implements UserDetails {
 
     private Boolean isActive;
 
+    private Date lastLoginTime;
+
+    private Date lastLogoutTime;
 
     private Collection<? extends GrantedAuthority>authorities;
 

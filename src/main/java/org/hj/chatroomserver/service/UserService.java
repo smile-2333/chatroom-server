@@ -10,7 +10,6 @@ import org.hj.chatroomserver.model.result.CommonCode;
 import org.hj.chatroomserver.model.result.ResponseResult;
 import org.hj.chatroomserver.repository.UserRepository;
 import org.hj.chatroomserver.util.BeanUtils;
-import org.hj.chatroomserver.util.FastdfsHelper;
 import org.hj.chatroomserver.util.UserState;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,18 +17,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
-    private final FastdfsHelper fastdfsHelper;
+    private final FileSystemService fileSystemService;
 
-    public UserService(UserRepository userRepository, EmailService emailService, FastdfsHelper fastdfsHelper) {
+    public UserService(UserRepository userRepository, EmailService emailService, FileSystemService fileSystemService) {
         this.userRepository = userRepository;
         this.emailService = emailService;
-        this.fastdfsHelper = fastdfsHelper;
+        this.fileSystemService = fileSystemService;
         UserState.setUserService(this);
     }
 
@@ -54,8 +54,11 @@ public class UserService {
         final UserDto userDto = BeanUtils.copyProperties(user, UserDto.class);
         userDto.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole().toString()));
 
+        user.setLastLoginTime(new Date());
+        userRepository.save(user);
         return userDto;
     }
+
 
     private User preCheck(String usernameOrEmail) {
         final Optional<User> byUsername = userRepository.findByUsername(usernameOrEmail);
@@ -100,14 +103,8 @@ public class UserService {
         /**
          * 上传，然后更新
          */
-        String extName = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf(".") + 1);
-
-        try {
-            final String filePath = fastdfsHelper.upload(file.getInputStream(), extName);
-            old.setAvatar(filePath);
-        } catch (Exception exp) {
-            throw new CustomException(CommonCode.UPLOAD_IMAGE_FAIL);
-        }
+        String filePath = fileSystemService.upload(file);
+        old.setAvatar(filePath);
 
         userRepository.save(old);
         UserState.refreshUser();
@@ -160,5 +157,11 @@ public class UserService {
         userRepository.save(user);
         UserState.refreshUser();
         return ResponseResult.SUCCESS();
+    }
+
+    public void logout(int userId){
+        final User user = findRawUser(userId);
+        user.setLastLogoutTime(new Date());
+        userRepository.save(user);
     }
 }

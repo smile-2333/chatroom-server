@@ -13,6 +13,8 @@ public enum CommonCode implements ResultCode{
     USERNAME_BEEN_USED(false,100010,"用户名已被占用"),
     EMAIL_BEEN_USED(false,100011,"邮箱已被占用"),
     MESSAGE_SENT_ERROR(false,100012,"消息发送失败"),
+    CONVERT_ERROR(false,100013,"类型转换失败"),
+    JPA_PARSER_ERROR(false,100014,"JPA转换失败")
     ;
 
     boolean success;

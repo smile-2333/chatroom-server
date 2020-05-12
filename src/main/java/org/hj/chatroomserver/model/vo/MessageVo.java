@@ -14,7 +14,7 @@ public class MessageVo {
 
     private Integer messageId;
 
-    private int ownerId;
+    private Integer ownerId;
 
     private String content;
 
