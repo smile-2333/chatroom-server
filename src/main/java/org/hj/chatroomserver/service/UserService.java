@@ -38,6 +38,7 @@ public class UserService {
         user.setRole(Role.NORMAL);
         user.setAvatar("http://47.93.53.45/M00/00/00/L101LV5zszKAavNcAAK1VqIpjXE762.png");
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        user.setDescription("我是新来的，请多多关照");
         final User save = userRepository.save(user);
 
         /**
@@ -147,7 +148,7 @@ public class UserService {
         }
 
         if (!StringUtils.equals(user.getCity(), userDto.getCity())) {
-            user.setDescription(userDto.getCity());
+            user.setCity(userDto.getCity());
         }
 
         if (!StringUtils.equals(user.getPhone(), userDto.getPhone())) {

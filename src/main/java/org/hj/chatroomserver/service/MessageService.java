@@ -15,7 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,14 +36,15 @@ public class MessageService {
         final Message message = new Message();
         message.setContent(messageDto.getContent());
         message.setContextType(messageDto.getContextType());
-        message.setOwnerId(messageDto.getUser().getUserId());
+        message.setSenderId(messageDto.getUser().getUserId());
+        message.setReceiverId(messageDto.getReceiverId());
         final Message save = messageRepository.save(message);
 
         final MessageVo messageVo = BeanUtils.copyProperties(save, MessageVo.class);
         final User user = messageDto.getUser();
         messageVo.setUsername(user.getUsername());
         messageVo.setAvatar(user.getAvatar());
-        messageVo.setOwnerId(user.getUserId());
+        messageVo.setSenderId(user.getUserId());
         return messageVo;
     }
 
@@ -51,12 +55,12 @@ public class MessageService {
     }
 
     private Page<MessageVo> convert(Page<Message> raw) {
-        final Set<Integer> ownerIds = raw.getContent().stream().map(Message::getOwnerId).collect(Collectors.toSet());
+        final Set<Integer> ownerIds = raw.getContent().stream().map(Message::getSenderId).collect(Collectors.toSet());
         final Map<Integer, User> ownerMap = userRepository.findByUserIdIn(ownerIds).stream().collect(Collectors.toMap(User::getUserId, Function.identity()));
 
         final Page<MessageVo> messageVos = raw.map(message -> {
             final MessageVo messageVo = BeanUtils.copyProperties(message, MessageVo.class);
-            final User user = ownerMap.get(message.getOwnerId());
+            final User user = ownerMap.get(message.getSenderId());
             messageVo.setUsername(user.getUsername());
             messageVo.setAvatar(user.getAvatar());
             return messageVo;
@@ -70,4 +74,6 @@ public class MessageService {
 
         return new PageImpl<>(result,messageVos.getPageable(),messageVos.getTotalElements());
     }
+
+
 }

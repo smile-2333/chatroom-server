@@ -14,7 +14,12 @@ public enum CommonCode implements ResultCode{
     EMAIL_BEEN_USED(false,100011,"邮箱已被占用"),
     MESSAGE_SENT_ERROR(false,100012,"消息发送失败"),
     CONVERT_ERROR(false,100013,"类型转换失败"),
-    JPA_PARSER_ERROR(false,100014,"JPA转换失败")
+    JPA_PARSER_ERROR(false,100014,"JPA转换失败"),
+    HANDLE_MESSAGE_ERROR(false,100015,"消息处理失败"),
+    PRIVATE_CHAT_ESTABLISH_FAIL(false,100016,"私聊建立失败"),
+    ACCOUNT_NOT_EXIST(false,100017,"账户不存在"),
+    PRIVATE_CHAT_REMOVE_FAIL(false,100018,"拆除私聊失败"),
+    PRIVATE_CHAT_NOT_EXIST(false,100019,"私聊不存在"),
     ;
 
     boolean success;

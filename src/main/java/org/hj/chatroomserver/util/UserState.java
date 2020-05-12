@@ -42,7 +42,7 @@ public class UserState {
         /**
          * 刷新用户数据
          */
-        final UserDto login = BeanUtils.copyProperties(user, UserDto.class);
+        final UserDto login = BeanUtils.copyProperties(rawUser, UserDto.class);
         login.setAuthorities(AuthorityUtils.commaSeparatedStringToAuthorityList(rawUser.getRole().toString()));
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

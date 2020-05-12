@@ -23,13 +23,10 @@ public class PrivateChat {
     private Integer privateChatId;
 
     @Column(nullable = false)
-    private int sender;
+    private Integer senderId;
 
     @Column(nullable = false)
-    private int acceptorId;
-
-    @Column(nullable = false)
-    private String privateChatKey;
+    private Integer receiverId;
 
     @CreatedDate
     private Date createTime;

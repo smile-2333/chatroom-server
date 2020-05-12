@@ -27,4 +27,5 @@ public class MessageController {
         queryMessageDto.setEndTime(UserState.getUser().getLastLoginTime());
         return messageService.query(queryMessageDto,pageable);
     }
+
 }

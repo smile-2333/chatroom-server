@@ -22,8 +22,17 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer messageId;
 
+    /**
+     * 发送者Id
+     */
     @Column(nullable = false)
-    private int ownerId;
+    private Integer senderId;
+
+    /**
+     * 接收者Id，-1代表没有，即聊天室，其他代表对应发送信息
+     */
+    @Column(nullable = false)
+    private Integer receiverId;
 
     @Column(nullable = false)
     private String content;
