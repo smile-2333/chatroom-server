@@ -12,19 +12,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	@Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        /*
-         * 用户可以订阅来自"/topic"和"/user"的消息，
-         * 在Controller中，可通过@SendTo注解指明发送目标，这样服务器就可以将消息发送到订阅相关消息的客户端
-         *
-         * 在本Demo中，使用topic来达到聊天室效果（单聊+多聊），使用all进行群发效果
-         *
-         * 客户端只可以订阅这两个前缀的主题
-         */
-        config.enableSimpleBroker("/topic","/subscribe/chatRoom");
+	    // 设置用户可订阅主题，换句话说，也是接口可以发送到的主题
+        config.enableSimpleBroker("/subscribe/openChat","/subscribe/chatRoom","/subscribe/chat");
 
-        /*
-         * 客户端发送过来的消息，需要以"/app"为前缀，再经过Broker转发给响应的Controller
-         */
+        // 发送过来的统一前缀
         config.setApplicationDestinationPrefixes("/send");
     }
 

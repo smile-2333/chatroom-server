@@ -4,6 +4,7 @@ import org.hj.chatroomserver.model.dto.UpdateUserDto;
 import org.hj.chatroomserver.model.dto.UserDto;
 import org.hj.chatroomserver.model.entity.User;
 import org.hj.chatroomserver.model.result.ResponseResult;
+import org.hj.chatroomserver.model.vo.OtherUserVo;
 import org.hj.chatroomserver.service.UserService;
 import org.hj.chatroomserver.util.UserState;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,11 @@ public class UserController {
     @GetMapping
     public UserDto findByUserId(){
         return UserState.getUser();
+    }
+
+    @GetMapping("{userId}")
+    public OtherUserVo findOtherByUserId(@PathVariable("userId")int userId){
+        return userService.findOtherByUserId(userId);
     }
 
 

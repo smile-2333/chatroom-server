@@ -17,7 +17,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -36,25 +35,19 @@ public class WebSocketTestController {
     }
 
     /**
-     * 单对单
-     * @param user
+     * 私聊
      * @throws Exception
      */
     @MessageMapping("/chat")
-    public void messageHandling(Principal user) throws Exception {
-        System.out.println();
-//        String destination = "/topic/" + HtmlUtils.htmlEscape(requestMessage.getRoom());
-//
-//        String sender = HtmlUtils.htmlEscape(requestMessage.getSender());  //htmlEscape  转换为HTML转义字符表示
-//        String type = HtmlUtils.htmlEscape(requestMessage.getType());
-//        String content = HtmlUtils.htmlEscape(requestMessage.getContent());
-//        ResponseMessage response = new ResponseMessage(sender, type, content);
-//
-//        messagingTemplate.convertAndSend(destination, response);
+    public void messageHandling(@Payload Message message,MessageDto messageDto) throws Exception {
+        final Map<String,String> map = objectMapper.readValue((byte[]) message.getPayload(), Map.class);
+        messageDto.setContextType(Enum.valueOf(ContextType.class,map.get("ContextType")));
+        final MessageVo sentMessage = messageService.saveMessage(messageDto);
+        simpMessagingTemplate.convertAndSend(String.format("/subscribe/chat/sender/%s/receiver/%s",messageDto.getUser().getUserId(),messageDto.getReceiverId()),sentMessage);
     }
 
     /**
-     * 聊天室
+     * 群聊
      *
      * @return
      */
@@ -99,17 +92,5 @@ public class WebSocketTestController {
         }
 
         simpMessagingTemplate.convertAndSend(String.format("/subscribe/openChat/%s", openOrCloseChatDto.getTargetUserId()), openOrCloseChatDto.getUser());
-    }
-
-    /**
-     * 关闭私聊
-     */
-    @MessageMapping("closeChat")
-    public void closeChat(OpenOrCloseChatDto openOrCloseChatDto){
-        if (!chatService.closeChat(openOrCloseChatDto)){
-            throw new CustomException(CommonCode.PRIVATE_CHAT_REMOVE_FAIL);
-        }
-
-        simpMessagingTemplate.convertAndSend(String.format("/subscribe/closeChat/%s", openOrCloseChatDto.getTargetUserId()), openOrCloseChatDto.getUser());
     }
 }

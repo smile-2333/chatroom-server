@@ -5,6 +5,7 @@ import org.hj.chatroomserver.model.dto.OpenOrCloseChatDto;
 import org.hj.chatroomserver.model.entity.PrivateChat;
 import org.hj.chatroomserver.model.entity.User;
 import org.hj.chatroomserver.model.result.CommonCode;
+import org.hj.chatroomserver.model.result.ResponseResult;
 import org.hj.chatroomserver.model.vo.PrivateChatVo;
 import org.hj.chatroomserver.repository.PrivateChatRepository;
 import org.hj.chatroomserver.repository.UserRepository;
@@ -32,16 +33,23 @@ public class ChatService {
 
     @Transactional
     public boolean openChat(OpenOrCloseChatDto openOrCloseChatDto) {
-        final PrivateChat senderSideChat = new PrivateChat();
-        senderSideChat.setSenderId(openOrCloseChatDto.getUser().getUserId());
-        senderSideChat.setReceiverId(openOrCloseChatDto.getTargetUserId());
+        PrivateChat resultSenderSideChat =  privateChatRepository.findBySenderIdAndReceiverId(openOrCloseChatDto.getUser().getUserId(),openOrCloseChatDto.getTargetUserId()).orElseGet(()->{
+            final PrivateChat senderSideChat = new PrivateChat();
+            senderSideChat.setSenderId(openOrCloseChatDto.getUser().getUserId());
+            senderSideChat.setReceiverId(openOrCloseChatDto.getTargetUserId());
+            return senderSideChat;
+        });
 
-        final PrivateChat receiverSideChat = new PrivateChat();
-        receiverSideChat.setSenderId(openOrCloseChatDto.getTargetUserId());
-        receiverSideChat.setReceiverId(openOrCloseChatDto.getUser().getUserId());
 
-        privateChatRepository.save(senderSideChat);
-        privateChatRepository.save(receiverSideChat);
+        PrivateChat resultReceiverSideChat = privateChatRepository.findBySenderIdAndReceiverId(openOrCloseChatDto.getTargetUserId(),openOrCloseChatDto.getUser().getUserId()).orElseGet(()->{
+            final PrivateChat receiverSideChat = new PrivateChat();
+            receiverSideChat.setReceiverId(openOrCloseChatDto.getUser().getUserId());
+            receiverSideChat.setSenderId(openOrCloseChatDto.getTargetUserId());
+            return receiverSideChat;
+        });
+
+        privateChatRepository.save(resultSenderSideChat);
+        privateChatRepository.save(resultReceiverSideChat);
 
         return true;
     }
@@ -74,11 +82,9 @@ public class ChatService {
         }).collect(Collectors.toList());
     }
 
-    public boolean closeChat(OpenOrCloseChatDto openOrCloseChatDto) {
-        final PrivateChat senderChat = privateChatRepository.findBySenderIdAndReceiverId(openOrCloseChatDto.getUser().getUserId(), openOrCloseChatDto.getTargetUserId()).orElseThrow(() -> new CustomException(CommonCode.PRIVATE_CHAT_NOT_EXIST));
-        final PrivateChat receiverChat = privateChatRepository.findBySenderIdAndReceiverId(openOrCloseChatDto.getTargetUserId(),openOrCloseChatDto.getUser().getUserId()).orElseThrow(() -> new CustomException(CommonCode.PRIVATE_CHAT_NOT_EXIST));
-        privateChatRepository.delete(senderChat);
-        privateChatRepository.delete(receiverChat);
-        return true;
+    public ResponseResult deleteReceiverChat(int senderId,int receiverId) {
+        final PrivateChat privateChat = privateChatRepository.findBySenderIdAndReceiverId(senderId, receiverId).orElseThrow(() -> new CustomException(CommonCode.PRIVATE_CHAT_NOT_EXIST));
+        privateChatRepository.delete(privateChat);
+        return ResponseResult.SUCCESS();
     }
 }

@@ -13,4 +13,6 @@ public interface PrivateChatRepository extends JpaRepository<PrivateChat,Integer
     List<PrivateChat>findBySenderId(int senderId);
 
     Optional<PrivateChat>findBySenderIdAndReceiverId(int senderId,int receiverId);
+
+    void deleteByReceiverId(int receiverId);
 }

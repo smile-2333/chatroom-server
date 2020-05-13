@@ -8,6 +8,7 @@ import org.hj.chatroomserver.model.entity.User;
 import org.hj.chatroomserver.model.enums.Role;
 import org.hj.chatroomserver.model.result.CommonCode;
 import org.hj.chatroomserver.model.result.ResponseResult;
+import org.hj.chatroomserver.model.vo.OtherUserVo;
 import org.hj.chatroomserver.repository.UserRepository;
 import org.hj.chatroomserver.util.BeanUtils;
 import org.hj.chatroomserver.util.UserState;
@@ -164,5 +165,10 @@ public class UserService {
         final User user = findRawUser(userId);
         user.setLastLogoutTime(new Date());
         userRepository.save(user);
+    }
+
+    public OtherUserVo findOtherByUserId(int userId) {
+        final User rawUser = findRawUser(userId);
+        return BeanUtils.copyProperties(rawUser,OtherUserVo.class);
     }
 }
