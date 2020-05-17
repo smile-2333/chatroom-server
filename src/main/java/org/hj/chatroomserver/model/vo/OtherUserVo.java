@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.Date;
 
+/**
+ * @see org.hj.chatroomserver.model.entity.User
+ */
 @Data
 public class OtherUserVo {
 
@@ -22,4 +25,10 @@ public class OtherUserVo {
     private Date lastLoginTime;
 
     private Date lastLogoutTime;
+
+    private Date createTime;
+
+    private Date updateTime;
+
+    private String statusDescription;
 }

@@ -14,4 +14,8 @@ public class QueryMessageDto {
     private Date startTime;
     @Query(field = "createTime", operator = Operator.LT)
     private Date endTime;
+
+    private Integer senderId;
+
+    private Integer receiverId;
 }

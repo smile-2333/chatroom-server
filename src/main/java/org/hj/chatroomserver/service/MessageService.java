@@ -9,12 +9,14 @@ import org.hj.chatroomserver.repository.MessageRepository;
 import org.hj.chatroomserver.repository.UserRepository;
 import org.hj.chatroomserver.util.BeanUtils;
 import org.hj.chatroomserver.util.persistence.QueryHelper;
+import org.hj.chatroomserver.util.persistence.SpecificationBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,9 +51,38 @@ public class MessageService {
     }
 
     public Page<MessageVo> query(QueryMessageDto queryMessageDto, Pageable pageable) {
-        final Specification<Message> specification = QueryHelper.parse(queryMessageDto,Message.class);
+
+        Specification<Message> specification = initSpecification(queryMessageDto);
+
+
         final Page<Message> raw = messageRepository.findAll(specification, pageable);
         return convert(raw);
+    }
+
+    private Specification<Message> initSpecification(QueryMessageDto queryMessageDto) {
+
+        final SpecificationBuilder<Message> messageSpecificationBuilder = QueryHelper.parseBuilder(queryMessageDto, Message.class);
+
+        return((root, query, criteriaBuilder) -> {
+
+            List<Predicate> predicates = new ArrayList<>();
+            if (queryMessageDto.getReceiverId()==-1){
+               predicates.add(criteriaBuilder.equal(root.get("receiverId").as(Integer.class),-1));
+            }else {
+                final Predicate receiverId = criteriaBuilder.and(criteriaBuilder.equal(root.get("receiverId").as(Integer.class), queryMessageDto.getReceiverId()));
+                final Predicate senderId = criteriaBuilder.and(criteriaBuilder.equal(root.get("senderId").as(Integer.class), queryMessageDto.getSenderId()));
+                final Predicate first = criteriaBuilder.and(receiverId, senderId);
+
+                final Predicate reverseReceiverId = criteriaBuilder.and(criteriaBuilder.equal(root.get("senderId").as(Integer.class), queryMessageDto.getReceiverId()));
+                final Predicate reverseSenderId = criteriaBuilder.and(criteriaBuilder.equal(root.get("receiverId").as(Integer.class), queryMessageDto.getSenderId()));
+                final Predicate second = criteriaBuilder.and(reverseReceiverId,reverseSenderId);
+
+                predicates.add(criteriaBuilder.or(first,second));
+            }
+
+            predicates.add(messageSpecificationBuilder.build().toPredicate(root,query,criteriaBuilder));
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        });
     }
 
     private Page<MessageVo> convert(Page<Message> raw) {

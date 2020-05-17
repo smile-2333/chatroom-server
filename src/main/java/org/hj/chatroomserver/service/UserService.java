@@ -2,16 +2,23 @@ package org.hj.chatroomserver.service;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hj.chatroomserver.exception.CustomException;
+import org.hj.chatroomserver.model.dto.QueryUserDto;
+import org.hj.chatroomserver.model.dto.ResetPasswordDto;
 import org.hj.chatroomserver.model.dto.UpdateUserDto;
 import org.hj.chatroomserver.model.dto.UserDto;
 import org.hj.chatroomserver.model.entity.User;
 import org.hj.chatroomserver.model.enums.Role;
+import org.hj.chatroomserver.model.enums.Status;
 import org.hj.chatroomserver.model.result.CommonCode;
 import org.hj.chatroomserver.model.result.ResponseResult;
 import org.hj.chatroomserver.model.vo.OtherUserVo;
 import org.hj.chatroomserver.repository.UserRepository;
 import org.hj.chatroomserver.util.BeanUtils;
 import org.hj.chatroomserver.util.UserState;
+import org.hj.chatroomserver.util.persistence.QueryHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -171,4 +178,55 @@ public class UserService {
         final User rawUser = findRawUser(userId);
         return BeanUtils.copyProperties(rawUser,OtherUserVo.class);
     }
+
+    public ResponseResult resetPassword(ResetPasswordDto resetPasswordDto) {
+        final User user = userRepository.findByEmailOrUsername(resetPasswordDto.getUsernameOrEmail(), resetPasswordDto.getUsernameOrEmail()).orElseThrow(() -> new CustomException(CommonCode.ACCOUNT_NOT_EXIST));
+        user.setPassword(resetPasswordDto.getNewPassword());
+        emailService.sendResetPasswordEmail(user);
+        return ResponseResult.SUCCESS();
+    }
+
+    public ResponseResult confirmResetPassword(String code) {
+        final User user = emailService.confirmSendResetPasswordEmail(code);
+
+        final User rawUser = findRawUser(user.getUserId());
+        rawUser.setPassword(new  BCryptPasswordEncoder().encode(user.getPassword()));
+        userRepository.save(rawUser);
+
+        return ResponseResult.SUCCESS();
+    }
+
+    public Page<OtherUserVo> getUsers(QueryUserDto queryUserDto, Pageable pageable) {
+        final Specification<User> specification = QueryHelper.parse(queryUserDto, User.class);
+        return userRepository.findAll(specification,pageable).map(
+                user -> {
+                    final OtherUserVo otherUserVo = BeanUtils.copyProperties(user, OtherUserVo.class);
+                    otherUserVo.setStatusDescription(Status.getStatus(user.getIsFreeze()).getDescription());
+                    return otherUserVo;
+                }
+        );
+    }
+
+    public ResponseResult freezeUser(int userId) {
+        final User user = findRawUser(userId);
+        if (user.getIsFreeze()==false){
+            user.setIsFreeze(true);
+            userRepository.save(user);
+        }
+        return ResponseResult.SUCCESS();
+    }
+
+    public ResponseResult deleteUser(int userId) {
+        final User user = findRawUser(userId);
+        userRepository.delete(user);
+        return ResponseResult.SUCCESS();
+    }
+
+    public ResponseResult deleteUser(int[] userIds) {
+        for (int userId : userIds) {
+            deleteUser(userId);
+        }
+        return ResponseResult.SUCCESS();
+    }
+
 }

@@ -61,4 +61,31 @@ public class EmailService {
 
         return userId;
     }
+
+
+    public void sendResetPasswordEmail(User user)  {
+        UUID key = UUID.randomUUID();
+
+        String activateURL = String.format("%s%s:9090%s?code=%s","http://",hostIP,"/user/confirm-reset-password", key);
+        String content = "Please click the url to reset password: " + activateURL;
+        String subject = "Activate your account";
+        Map<String,String> mailMap = new HashMap<>();
+        mailMap.put("content",content);
+        mailMap.put("subject",subject);
+        mailMap.put("from","980959100@qq.com");
+        mailMap.put("to",user.getEmail());
+
+        try {
+            final String infoStr = objectMapper.writeValueAsString(mailMap);
+            rabbitTemplate.convertAndSend(RabbitmqConfig.EXCHANGE_EMAIL,RabbitmqConfig.KEY,infoStr);
+            cacheHelper.getResetPassword().put(key.toString(),user);
+        }catch (JsonProcessingException ex){
+            throw new CustomException(CommonCode.SEND_EMAIL_FAIL);
+        }
+    }
+
+    public User confirmSendResetPasswordEmail(String code){
+
+       return cacheHelper.getResetPassword().get(code);
+    }
 }

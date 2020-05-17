@@ -1,6 +1,7 @@
 package org.hj.chatroomserver.model.dto;
 
 import lombok.Data;
+import org.hj.chatroomserver.model.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -40,6 +41,8 @@ public class UserDto implements UserDetails {
     private Date lastLoginTime;
 
     private Date lastLogoutTime;
+
+    private Role role;
 
     private Collection<? extends GrantedAuthority>authorities;
 
