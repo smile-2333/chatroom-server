@@ -1,10 +1,13 @@
 package org.hj.chatroomserver.controller;
 
-import org.hj.chatroomserver.model.result.ResponseResult;
+import org.hj.chatroomserver.model.result.FileUploadResponseResult;
 import org.hj.chatroomserver.model.vo.UserFileVo;
 import org.hj.chatroomserver.service.FileSystemService;
 import org.hj.chatroomserver.util.UserState;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,12 +23,12 @@ public class FileSystemController {
     }
 
     @PostMapping("/upload")
-    public ResponseResult upload(HttpServletRequest request, @RequestParam("file") MultipartFile file) throws Exception {
-        return ResponseResult.SUCCESS(fileSystemService.upload(file));
+    public FileUploadResponseResult upload(HttpServletRequest request, @RequestParam("file") MultipartFile file) throws Exception {
+        return fileSystemService.upload(file);
     }
 
-    @GetMapping("recent-files/{filesNum}")
-    public Page<UserFileVo> recentFiles(@PathVariable("filesNum")int filesNum){
-        return  fileSystemService.findRecentFiles(filesNum, UserState.getUser().getUserId());
+    @GetMapping("recent")
+    public Page<UserFileVo> recentFiles(@PageableDefault(sort = "createTime",direction = Sort.Direction.DESC)  Pageable pageable){
+        return  fileSystemService.findRecentFiles(UserState.getUser().getUserId(),pageable);
     }
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hj.chatroomserver.model.enums.ContextType;
+import org.hj.chatroomserver.model.enums.ResourceType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -46,4 +47,12 @@ public class Message {
 
     @LastModifiedDate
     private Date updateTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private ResourceType resourceType;
+
+    @Column
+    private String fileName;
+
 }

@@ -112,7 +112,7 @@ public class UserService {
         /**
          * 上传，然后更新
          */
-        String filePath = fileSystemService.upload(file);
+        String filePath = fileSystemService.upload(file).getFilePath();
         old.setAvatar(filePath);
 
         userRepository.save(old);

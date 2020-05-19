@@ -1,7 +1,9 @@
 package org.hj.chatroomserver.model.vo;
 
 import lombok.Data;
+import org.hj.chatroomserver.model.entity.User;
 import org.hj.chatroomserver.model.enums.ContextType;
+import org.hj.chatroomserver.model.enums.ResourceType;
 
 import java.util.Date;
 
@@ -27,4 +29,12 @@ public class MessageVo {
     private String avatar;
 
     private String username;
+
+    private User sender;
+
+    private User receiver;
+
+    private ResourceType resourceType;
+
+    private String fileName;
 }
