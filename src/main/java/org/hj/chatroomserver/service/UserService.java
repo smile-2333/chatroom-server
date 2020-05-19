@@ -68,6 +68,17 @@ public class UserService {
         return userDto;
     }
 
+    public UserDto login(String usernameOrEmail,String password) {
+        final UserDto login = this.login(usernameOrEmail);
+        if (login !=null){
+
+            if (new BCryptPasswordEncoder().matches(password,login.getPassword())){
+                return login;
+            }
+        }
+        return null;
+    }
+
 
     private User preCheck(String usernameOrEmail) {
         final Optional<User> byUsername = userRepository.findByUsername(usernameOrEmail);

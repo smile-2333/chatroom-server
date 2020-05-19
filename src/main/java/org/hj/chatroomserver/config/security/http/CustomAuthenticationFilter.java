@@ -1,4 +1,4 @@
-package org.hj.chatroomserver.config.security;
+package org.hj.chatroomserver.config.security.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;

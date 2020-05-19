@@ -1,4 +1,4 @@
-package org.hj.chatroomserver.config.security;
+package org.hj.chatroomserver.config.security.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hj.chatroomserver.model.dto.UserDto;

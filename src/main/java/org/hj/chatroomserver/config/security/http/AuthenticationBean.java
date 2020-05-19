@@ -1,4 +1,4 @@
-package org.hj.chatroomserver.config.security;
+package org.hj.chatroomserver.config.security.http;
 
 import lombok.Data;
 

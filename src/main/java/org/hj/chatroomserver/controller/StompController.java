@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hj.chatroomserver.exception.CustomException;
 import org.hj.chatroomserver.model.dto.MessageDto;
 import org.hj.chatroomserver.model.dto.OpenOrCloseChatDto;
+import org.hj.chatroomserver.model.dto.UserDto;
 import org.hj.chatroomserver.model.enums.ContextType;
 import org.hj.chatroomserver.model.enums.Event;
 import org.hj.chatroomserver.model.result.CommonCode;
@@ -15,19 +16,21 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
 @RestController
-public class WebSocketTestController {
+public class StompController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final MessageService messageService;
     private final ObjectMapper objectMapper;
     private final ChatService chatService;
 
-    public WebSocketTestController(SimpMessagingTemplate simpMessagingTemplate, MessageService messageService, ObjectMapper objectMapper, ChatService chatService) {
+    public StompController(SimpMessagingTemplate simpMessagingTemplate, MessageService messageService, ObjectMapper objectMapper, ChatService chatService) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.messageService = messageService;
         this.objectMapper = objectMapper;
@@ -39,11 +42,12 @@ public class WebSocketTestController {
      * @throws Exception
      */
     @MessageMapping("/chat")
-    public void messageHandling(@Payload Message message,MessageDto messageDto) throws Exception {
+    public void messageHandling(@Payload Message message,MessageDto messageDto,StompHeaderAccessor accessor) throws Exception {
+        final UserDto sender = (UserDto) ((UsernamePasswordAuthenticationToken) (accessor.getUser())).getPrincipal();
         final Map<String,String> map = objectMapper.readValue((byte[]) message.getPayload(), Map.class);
         messageDto.setContextType(Enum.valueOf(ContextType.class,map.get("ContextType")));
         final MessageVo sentMessage = messageService.saveMessage(messageDto);
-        simpMessagingTemplate.convertAndSend(String.format("/subscribe/chat/sender/%s/receiver/%s",messageDto.getUser().getUserId(),messageDto.getReceiverId()),sentMessage);
+        simpMessagingTemplate.convertAndSend(String.format("/subscribe/chat/sender/%s/receiver/%s",sender.getUserId(),messageDto.getReceiverId()),sentMessage);
     }
 
     /**
@@ -53,7 +57,9 @@ public class WebSocketTestController {
      */
     @MessageMapping("chatRoom")
     @SendTo("/subscribe/chatRoom")
-    public MessageVo messageHandlingAll(@Payload Message message, MessageDto messageDto)  {
+    public MessageVo messageHandlingAll(@Payload Message message, MessageDto messageDto, StompHeaderAccessor accessor)  {
+        final UserDto sender = (UserDto) ((UsernamePasswordAuthenticationToken) (accessor.getUser())).getPrincipal();
+
         try {
             final Map<String,String> map = objectMapper.readValue((byte[]) message.getPayload(), Map.class);
 
@@ -62,12 +68,12 @@ public class WebSocketTestController {
             switch (event){
                 case LOGIN:
                     final MessageVo loginMessage = new MessageVo();
-                    loginMessage.setContent(String.format("欢迎%s加入聊天室",messageDto.getUser().getUsername()));
+                    loginMessage.setContent(String.format("欢迎%s加入聊天室",sender.getUsername()));
                     loginMessage.setContextType(ContextType.WELCOME);
                     return loginMessage;
                 case LOGOUT:
                     final MessageVo logoutMessage = new MessageVo();
-                    logoutMessage.setContent(String.format("%s离开了聊天室",messageDto.getUser().getUsername()));
+                    logoutMessage.setContent(String.format("%s离开了聊天室",sender.getUsername()));
                     logoutMessage.setContextType(ContextType.WELCOME);
                     return logoutMessage;
                 case SENT_MESSAGE:
