@@ -65,6 +65,7 @@ public class UserService {
 
         user.setLastLoginTime(new Date());
         userRepository.save(user);
+        userDto.setLastLoginTime(user.getLastLoginTime());
         return userDto;
     }
 
